@@ -1,0 +1,4 @@
+function listfiles() {
+   git show --pretty='format:' --name-status $* | sort -u -k2
+}
+

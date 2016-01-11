@@ -1,12 +1,27 @@
 #!/usr/bin/env bash
 
-cd "$(dirname "${BASH_SOURCE}")";
+DRY_RUN=
+DRY_RUN=--dry-run
 
+cd "$(dirname "${BASH_SOURCE}")/..";
+
+#
+# Make sure that we have the latest and greatest.
+#
 git pull origin master;
 
+EXCLUDES=./tools/excludes.txt
+
+SOURCE=dots
+TARGET=~/dot-test
+mkdir ${TARGET}
+
 function doIt() {
-	rsync --exclude ".git/" --exclude ".DS_Store" --exclude "install.sh" \
-		--exclude "README.md" --exclude "LICENSE-MIT.txt" -avh --no-perms . ~;
+	rsync ${DRY_RUN} --excludeFile "${EXCLUDES}" -avh --no-perms ${SOURCE} ${TARGET};
+	#
+	# Not sure about this as it only affects the current terminal it could create
+	# a false sense that thigs are changed.
+	#
 	source ~/.bash_profile;
 }
 

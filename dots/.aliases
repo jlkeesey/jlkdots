@@ -1,0 +1,21 @@
+alias ls="ls -aF"
+alias md=mkdir
+alias cls=clear
+
+alias startsel='webdriver-manager --seleniumPort 4445 start'
+
+alias master="git checkout master"
+alias gitb="git branch"
+alias gitl="git log --pretty=oneline --abbrev-commit"
+alias gits="git status -sb"
+alias gb="git branch"
+alias gs="git status"
+alias gd='git diff HEAD^1..HEAD'
+alias gca='git commit --amend'
+alias gpp='git pull --rebase && git push'
+alias gmf='git merge --ff-only'
+alias gls="git log --graph --pretty=format:'%C(cyan)%h%C(red)%d%Creset %s %C(yellow)- %an,%C(magenta) %ar%Creset'"
+alias gfix="git mergetool -y"
+
+alias splitpath='echo "$PATH" | tr ":" "\n"'
+
