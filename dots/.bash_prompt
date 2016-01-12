@@ -1,3 +1,4 @@
+
 export GIT_PS1_SHOWDIRTYSTATE=true
 export GIT_PS1_SHOWUNTRACKEDFILES=true
 export GIT_PS1_SHOWCOLORHINTS=true
@@ -5,6 +6,17 @@ export GIT_PS1_SHOWCOLORHINTS=true
 export GIT_PS1_SHOWSTASHSTATE=true
 export GIT_PS1_SHOWUPSTREAM=verbose
 
-source ~/.git-prompt.sh
+sourceIf ~/.git-prompt.sh true
 
-export PROMPT_COMMAND='__git_ps1 "\n" " \[\e[35m\]\w \[\e[0m\]$ " "(%s)"'
+PROMPT_PREFIX="\n"
+PROMPT_SUFFIX=" \[\e[35m\]\w \[\e[0m\]$ "
+PROMPT_PATTERN="(%s)"
+
+#
+# Prompt will be:
+#
+#   ${PROMPT_PREFIX}${PROMPT_PATTERN}${PROMPT_SUFFIX}
+#
+# with the %s in the PROMPT_PATTERN replaced with the generated string for GIT
+#
+export PROMPT_COMMAND='__git_ps1 "${PROMPT_PREFIX}" "${PROMPT_SUFFIX}" "${PROMPT_PATTERN}"'

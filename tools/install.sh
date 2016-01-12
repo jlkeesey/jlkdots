@@ -1,28 +1,21 @@
 #!/usr/bin/env bash
 
 DRY_RUN=
-DRY_RUN=--dry-run
+#DRY_RUN=--dry-run
 
 cd "$(dirname "${BASH_SOURCE}")/..";
 
 #
 # Make sure that we have the latest and greatest.
 #
-git pull origin master;
-
-EXCLUDES=./tools/excludes.txt
+#git pull origin master;
 
 SOURCE=dots
-TARGET=~/dot-test
-mkdir ${TARGET}
+TARGET=~
+[ ! -e ${TARGET} ] && mkdir ${TARGET}
 
 function doIt() {
-	rsync ${DRY_RUN} --excludeFile "${EXCLUDES}" -avh --no-perms ${SOURCE} ${TARGET};
-	#
-	# Not sure about this as it only affects the current terminal it could create
-	# a false sense that thigs are changed.
-	#
-	source ~/.bash_profile;
+    tar -C ${SOURCE} -c -T ./list -f - | tar -C ${TARGET} -xv
 }
 
 if [ "$1" == "--force" -o "$1" == "-f" ]; then

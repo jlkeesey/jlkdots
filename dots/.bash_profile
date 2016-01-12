@@ -1,5 +1,5 @@
-set -x
-echo '@@@ .bash_profile'
+export DEBUG_PREFIX='@@@'
+
 #
 # Just invoke the .bashrc and have all settings there. Technically, somethings like environment
 # variables can be set and exported once here to save some processing but in practice, the time

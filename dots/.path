@@ -1,0 +1,7 @@
+#
+# Save original system path
+#
+export ORIGINAL_PATH=$PATH
+
+export PATH="$HOME/bin:$PATH";
+
