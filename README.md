@@ -12,15 +12,21 @@ to retain just in case. At some point they will be removed when we
 are sure that they are not needed. This directory will not be copied
 to the HOME directory.
 </dd>
-<dt>todo/</dt>
+<dt>dots</dt>
+<dd>
+This folder contains all of the configuration or "dot files" that are tracked
+in this system. Everything else is support or bookkeeping for the project.
+</dd>
+<dt>dots/bin/</dt>
+<dd>
+Common commands and scripts. These will be copied along with the dot files to
+the ~/bin/ directory without affecting any other files in ~/bin/.
+</dd>
+<dt>future/</dt>
 <dd>
 This folder contains items that are in progress or have not yet been processed.
 Eventually they will be copied to the parent directory. This directory is not
 copied to the HOME directory.
-</dd>
-<dt>bin/</dt>
-<dd>
-Common commands and scripts.
 </dd>
 <dt>install.sh</dt>
 <dd>
