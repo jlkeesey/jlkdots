@@ -1,0 +1,48 @@
+[user]
+	name = James Keesey
+	email = keesey@carkees.net
+[core]
+        repositoryformatversion = 0
+        filemode = true
+        bare = false
+        logallrefupdates = true
+	pager = less -r
+	excludesfile = /Users/JamesKeesey/.gitignore_global
+[commit]
+[alias]
+	mt = mergetool
+	hist = log --pretty=format:\"%h %ad | %s%d [%an]\" --graph --date=short
+	llog = log --graph --pretty=format:\"%C(cyan)%h%C(red)%d%Creset %s %C(yellow)- %an,%C(magenta) %ar%Creset\"
+	ca = commit --amend
+	co = checkout
+	lg = log --color --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset' --abbrev-commit --
+	# oldest-ancestor = !zsh -c "diff --old-line-format='' --new-line-format='' <(git rev-list --first-parent \'${1:-master}\') <(git rev-list --first-parent \'${2:-HEAD}\') | head -1 -"
+
+#Add following items to ~/.gitconfig
+[merge]
+    renamelimit = 4500
+	ff = only
+[mergetool]
+    keepBackup = false
+[push]
+	default = simple
+[log]
+	date = local
+[color]
+	ui = true
+[difftool "sourcetree"]
+	cmd = opendiff \"$LOCAL\" \"$REMOTE\"
+	path =
+[filter "media"]
+	required = true
+	clean = git media clean %f
+	smudge = git media smudge %f
+[filter "hawser"]
+	clean = git hawser clean %f
+	smudge = git hawser smudge %f
+	required = true
+[filter "lfs"]
+	clean = git lfs clean %f
+	smudge = git lfs smudge %f
+	required = true
+[commit]

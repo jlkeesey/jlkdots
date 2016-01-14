@@ -1,0 +1,54 @@
+#!/bin/bash
+
+confirm () {
+   # call with a prompt string or use a default
+   read -r -p "${1:-Are you sure?} ${2:-[y/N]} " response
+   case $response in
+      [yY][eE][sS]|[yY]) 
+         true
+         ;;
+      *)
+         false
+         ;;
+   esac
+}
+
+yconfirm () {
+   if confirm "${1:-Are you sure?}" "[Y/n]" ; then
+      return 1
+   else
+      return 0
+   fi
+}
+
+if [[ $# -ne 2 ]]; then
+   echo "Expected 2 parameters"
+   exit 3
+fi
+
+echo ""
+
+# currentBranch=$(git rev-parse --abbrev-ref HEAD)
+#if [[ $currentBranch != develop && $currentBranch != release* ]]; then
+#    echo "Must be in the 'develop' or a release branch"
+#    exit 3
+#fi
+
+jiraId=$1
+text=$2
+
+if [[ $jiraId =~ ^[-A-Z]+-[0-9]+$ ]]; then
+   :
+else
+   echo "First parameter must be a valid Jira ID '[A-Z]+-[0-9]+'"
+   exit 3
+fi
+
+converted=${text//[^a-zA-Z0-9-]/_}
+branchName="feature/$jiraId-$converted"
+
+yconfirm "Create new branch '$branchName'?" || exit 1
+
+git checkout -b $branchName
+git push --set-upstream origin "$branchName"
+
