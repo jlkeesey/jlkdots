@@ -9,7 +9,10 @@
 # of the dot file project so getting the parent of the script's directory should be
 # the dot files project root directory.
 #
-projectDir=$(cd $( dirname ${BASH_SOURCE[0]} )/.. && pwd)
+scriptDir=$(cd $( dirname ${BASH_SOURCE[0]} ) && pwd)
+projectDir=$(cd ${scriptDir}/.. && pwd)
+
+. ${scriptDir}/common.sh
 
 #
 # Displays this script's usage message and then exits.
@@ -25,56 +28,11 @@ function usage() {
     echo "  -d             turns on debug mode which only echos the commands to be run."
     echo "  -f             forces copying over files that exist--the exiting files will be"
     echo "                 be copied to a backup first."
-    echo "  -r             dyr-run mode. Does not copy any files."
+    echo "  -r             dry-run mode. Does not copy any files."
     echo "  -t targetDir   specifies the home or target directory for this command (defaults"
     echo "                 to the current user's HOME directory)"
     echo ""
     exit 3
-}
-
-#
-# Run MD5 against a file to get a hash to use to check if a file has changed.
-#
-function md5prog() {
-    if [ $(uname) = "Darwin" ]; then
-        md5 -q $1
-    fi
-    if [ $(uname) = "Linux" ]; then
-        md5sum $1 | awk {'print $1'}
-    fi
-}
-
-#
-# Writes a debuf message.
-#
-function echoDebug() {
-    if [ "${debug}" = true ]; then
-        if [[ -z "$*" ]]; then
-            echo ""
-        else
-            echo "${colorDebug}  >> $*${colorReset}"
-        fi
-    fi
-}
-
-#
-# Writes out a status message for an item.
-#
-function echoStatus() {
-    echo "${colorStatus}$1 ${colorText}$2${colorReset}"
-}
-
-#
-# Execute a command optionally displaying it first.
-#
-function execute() {
-    local cmd=$*
-    if [ "${debug}" = true ]; then
-        echoDebug ${cmd}
-    fi
-    if [[ "${dryRun}" != true ]]; then
-        eval ${cmd}
-    fi
 }
 
 #
@@ -123,7 +81,11 @@ function copyDirectory() {
     local dotsDirAsset=$2
     local targetAsset=$3
     echoStatus ". [dir]" "${targetAsset}"
-    local assets=$(find ${asset} -mindepth 1 -maxdepth 1 -print | xargs)
+    #
+    # find all files in the given directory without recursing and strip off any
+    # leading ./ from the names. It works with them but I don't like how it looks.
+    #
+    local assets=$(find ${asset} -mindepth 1 -maxdepth 1 -print | sed -e 's!^\./!!g' | xargs)
     install_assets ${assets}
 }
 
@@ -189,18 +151,6 @@ function doIt() {
 
     install_assets "."
 }
-
-normal=$(tput sgr0)
-red=$(tput setaf 1)
-green=$(tput setaf 2)
-yellow=$(tput setaf 3)
-cyan=$(tput setaf 6)
-
-colorReset=${normal}
-colorText=${normal}
-colorStatus=${green}
-colorDebug=${cyan}
-colorError=${red}
 
 force=
 dryRun=

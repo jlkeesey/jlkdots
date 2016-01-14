@@ -12,7 +12,10 @@
 # of the dot file project so getting the parent of the script's directory should be
 # the dot files project root directory.
 #
-projectDir=$(cd $( dirname ${BASH_SOURCE[0]} )/.. && pwd)
+scriptDir=$(cd $( dirname ${BASH_SOURCE[0]} ) && pwd)
+projectDir=$(cd ${scriptDir}/.. && pwd)
+
+. ${scriptDir}/common.sh
 
 #
 # Displays this script's usage message and then exits.
@@ -26,7 +29,7 @@ function usage() {
     echo "determined by the MD5 hash of the files."
     echo ""
     echo "  -d             turns on debug mode which only echos the commands to be run."
-    echo "  -f             turns off prompting for replacing files (force)."
+    echo "  -r             dry-run mode. Does not copy any files."
     echo "  -s sourceDir   specifies the home or source directory for this command (defaults"
     echo "                 to the current user's HOME directory)"
     echo ""
@@ -34,59 +37,19 @@ function usage() {
 }
 
 #
-# Run MD5 against a file to get a hash to use to check if a file has changed.
-#
-function md5prog() {
-    if [ $(uname) = "Darwin" ]; then
-        md5 -q $1
-    fi
-    if [ $(uname) = "Linux" ]; then
-        md5sum $1 | awk {'print $1'}
-    fi
-}
-
-#
-# Writes a debuf message.
-#
-function echoDebug() {
-    if [ "${debug}" = true ]; then
-        if [[ -z "$*" ]]; then
-            echo ""
-        else
-            echo "${colorDebug}  >> $*${colorReset}"
-        fi
-    fi
-}
-
-#
-# Writes out a status message for an item.
-#
-function echoStatus() {
-    echo "${colorStatus}$1 ${colorText}$2${colorReset}"
-}
-
-#
-# Execute a command optionally displaying it first.
-#
-function execute() {
-    local cmd=$*
-    if [ "${debug}" = true ]; then
-        echoDebug ${cmd}
-    fi
-    if [[ "${force}" = true || "${debug}" != true ]]; then
-        eval ${cmd}
-    fi
-}
-
-#
 # Recursively copies the items in a directory.
 #
 function copyDirectory() {
-    local asset=$1
-    local dotsAsset=$2
-    local homeAsset=$3
+    local asset=${1%/.}
+    local dotsAsset=${2%/.}
+    local homeAsset=${3%/.}
+
     echoStatus ". [dir]" "${homeAsset}"
-    local assets=$(find ${asset} -mindepth 1 -maxdepth 1 -print | xargs)
+    #
+    # find all files in the given directory without recursing and strip off any
+    # leading ./ from the names. It works with them but I don't like how it looks.
+    #
+    local assets=$(find ${asset} -mindepth 1 -maxdepth 1 -print | sed -e 's!^\./!!g' | xargs)
     retrieveAssets ${assets}
 }
 
@@ -144,22 +107,10 @@ function doIt() {
     retrieveAssets "."
 }
 
-normal=$(tput sgr0)
-red=$(tput setaf 1)
-green=$(tput setaf 2)
-cyan=$(tput setaf 6)
-
-colorReset=${normal}
-colorText=${normal}
-colorStatus=${green}
-colorDebug=${cyan}
-colorError=${red}
-
 force=
 debug=
 home=
 dotsDir="${projectDir}/dots"
-backupName=".dot.bak"
 
 cd ${dotsDir}
 
@@ -170,7 +121,7 @@ else
     home=$HOME
 fi
 
-args=`getopt dfs: $*`
+args=`getopt drs: $*`
 # you should not use `getopt abo: "$@"` since that would parse
 # the arguments differently from what the set command below does.
 if [ $? != 0 ]; then
@@ -185,8 +136,8 @@ for i; do
         -d)
             debug=true
             shift;;
-        -f)
-            force=true
+        -r)
+            dryRun=true
             shift;;
         -s)
             home=$2
@@ -197,12 +148,9 @@ for i; do
     esac
 done
 
-backupDir="${home}/${backupName}"
-
-echoDebug "force is" ${force}
+echoDebug "dryRun is" ${dryRun}
 echoDebug "debug is" ${debug}
 echoDebug "home is" ${home}
-echoDebug "backup folder is" ${backupDir}
 echoDebug "projectDir is" ${projectDir}
 echoDebug "dotsDir is" ${dotsDir}
 echo ""
