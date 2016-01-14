@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
+# Copyright (c) 2015-2016 James Keesey
+
 #
 # This script copies the tracked configuration or "dot files" to their respective
 # places.

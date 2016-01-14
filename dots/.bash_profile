@@ -1,3 +1,5 @@
+# Copyright (c) 2015-2016 James Keesey
+
 export DEBUG_PREFIX='@@@'
 
 #

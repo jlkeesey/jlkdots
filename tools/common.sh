@@ -1,4 +1,7 @@
 #!/usr/bin/env bash
+
+# Copyright (c) 2015-2016 James Keesey
+
 #
 # This script contains common code for the other scripts.
 #

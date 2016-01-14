@@ -1,5 +1,7 @@
 #!/bin/sh
 
+# Copyright (c) 2015-2016 James Keesey
+
 git log --reverse --format='%aN <%aE>' -- . | perl -we '
 BEGIN {
   %seen = (), @authors = ();

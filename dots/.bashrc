@@ -1,3 +1,5 @@
+# Copyright (c) 2015-2016 James Keesey
+
 DEBUG_PROFILE=true
 if [ ${DEBUG_PROFILE} = true ]; then
     #set -x
