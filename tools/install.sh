@@ -1,35 +1,40 @@
 #!/usr/bin/env bash
 #
 # This script copies the tracked configuration or "dot files" to their respective
-# places. We do not check if there are
-
-DOTFILES=$(cd $( dirname ${BASH_SOURCE[0]} )/.. && pwd)
+# places.
+#
 
 #
-# Make sure that we have the latest and greatest.
+# Where the dot files directory root is. This script is in the tools/ subdirectory
+# of the dot file project so getting the parent of the script's directory should be
+# the dot files project root directory.
 #
-#git pull origin master;
+projectDir=$(cd $( dirname ${BASH_SOURCE[0]} )/.. && pwd)
 
-#fixing installation folder if user is root
-if [ $(whoami) = "root" ];
-  then
-    TARGET="/root";
-  else
-    TARGET=$HOME;
-fi
+#
+# Displays this script's usage message and then exits.
+#
+function usage() {
+    echo ""
+    echo "usage: $(basename ${BASH_SOURCE[0]}) [-d] [-f] [-r] [-t targetdir]"
+    echo ""
+    echo "Installs the configuration (or dot files) in this project to their"
+    echo "proper locations. Files are only copied if they have changed as"
+    echo "determined by the MD5 hash of the files."
+    echo ""
+    echo "  -d             turns on debug mode which only echos the commands to be run."
+    echo "  -f             forces copying over files that exist--the exiting files will be"
+    echo "                 be copied to a backup first."
+    echo "  -r             dyr-run mode. Does not copy any files."
+    echo "  -t targetDir   specifies the home or target directory for this command (defaults"
+    echo "                 to the current user's HOME directory)"
+    echo ""
+    exit 3
+}
 
-SOURCE="${DOTFILES}/dots"
-BACKUP_NAME=".dot.bak";
-BACKUP_DIR="${TARGET}/${BACKUP_NAME}";
-
-[ ! -e ${BACKUP_DIR} ] && mkdir ${BACKUP_DIR}
-
-#debug=true
-#----debug setup----
-#home=$1
-#gitrepo=$2;
-#------------------
-
+#
+# Run MD5 against a file to get a hash to use to check if a file has changed.
+#
 function md5prog() {
     if [ $(uname) = "Darwin" ]; then
         md5 -q $1
@@ -39,93 +44,219 @@ function md5prog() {
     fi
 }
 
-function copyNew() {
-    local asset=$1;
-    local sourceAsset="${SOURCE}/${asset}";
-    local targetAsset="${TARGET}/${asset}";
-    #asset does not exist, can just copy it
-    echo "N [new] ${targetAsset}";
-    local recurse=""
-    if [ -d ${sourceAsset} ]; then
-        recurse=-R;
-    fi
+#
+# Writes a debuf message.
+#
+function echoDebug() {
     if [ "${debug}" = true ]; then
-        echo cp ${recurse} ${sourceAsset} "${TARGET}/$(dirname ${asset})";
-    else
-        cp ${recurse} ${sourceAsset} "${TARGET}/$(dirname ${asset})";
+        if [[ -z "$*" ]]; then
+            echo ""
+        else
+            echo "${colorDebug}  >> $*${colorReset}"
+        fi
     fi
 }
 
+#
+# Writes out a status message for an item.
+#
+function echoStatus() {
+    echo "${colorStatus}$1 ${colorText}$2${colorReset}"
+}
+
+#
+# Execute a command optionally displaying it first.
+#
+function execute() {
+    local cmd=$*
+    if [ "${debug}" = true ]; then
+        echoDebug ${cmd}
+    fi
+    if [[ "${dryRun}" != true ]]; then
+        eval ${cmd}
+    fi
+}
+
+#
+# Copies a file from the dotsDir to the target that does not already exist. Because
+# the file does not exist we do not need to back it up.
+#
+function copyNew() {
+    local asset=$1
+    local dotsDirAsset=$2
+    local targetAsset=$3
+    local targetDir=$(dirname ${targetAsset})
+    #asset does not exist, can just copy it
+    echoStatus "N [new]" "${targetAsset}"
+    if [ ! -e "${targetDir}" ]; then
+        execute mkdir -p "${targetDir}"
+    fi
+    execute cp "${dotsDirAsset}" "${targetDir}"
+}
+
+#
+# Copies the asset after backing up the existing item first.
+#
 function copyBackup() {
     local asset=$1;
-    local sourceAsset="${SOURCE}/${asset}";
-    local targetAsset="${TARGET}/${asset}";
-    #asset exist but is different, must back it up
-    echo "C [conflict] ${targetAsset}";
-    local backupTargetDir="${BACKUP_DIR}/$(dirname ${targetAsset#$HOME/})"
-    if [ "${debug}" = true ]; then
-        if [ ! -e ${backupTargetDir} ]; then
-            echo mkdir -p ${backupTargetDir}
+    local dotsDirAsset=$2
+    local targetAsset=$3
+    if [ "${force}" = true ]; then
+        local backupName="${backupDir}/${asset}-$(date +"%F-%R:%S")"
+        echoStatus "C [conflict]" "${targetAsset} ${red}(forcing--backup to ${backupName})"
+        local backuptargetDir="${backupDir}/$(dirname ${asset#$HOME/})"
+        if [ ! -e "${backuptargetDir}" ]; then
+            execute mkdir -p "${backuptargetDir}"
         fi
-        echo mv ${targetAsset} ${BACKUP_DIR}/${asset};
-        echo cp ${sourceAsset} ${TARGET};
+        execute mv "${targetAsset}" "${backupName}"
+        execute cp "${dotsDirAsset}" "${target}"
     else
-        if [ ! -e ${backupTargetDir} ]; then
-            mkdir -p ${backupTargetDir}
-        fi
-        mv ${targetAsset} ${BACKUP_DIR}/${asset};
-        cp ${sourceAsset} ${TARGET};
+        echoStatus "C [conflict]" "${targetAsset} ${yellow}(skipping)"
     fi
 }
 
-function install_assets() {
-    local assets=$1
-    for asset in $@; do
-        local sourceAsset="${SOURCE}/${asset}";
-        local targetAsset="${TARGET}/${asset}";
-        if [ ! -e ${targetAsset} ]; then
-            copyNew ${asset}                                      # asset does not exist, can just copy it
-        else                                                      # asset is there already
-            if [ -d $home/$asset ]; then
-                copyNew ${asset}                                  # Dir exists just add to it
-            else
-                targetHash=$(md5prog ${targetAsset});
-                sourceHash=$(md5prog ${sourceAsset});
-                if [ ${sourceHash} = ${targetHash} ]; then        # asset is exactly the same
-                    echo "S [same] ${targetAsset}";
-                else
-                    copyBackup ${asset}                           # asset exist but is different, must back it up
-                fi
-            fi
-        fi
-    done
-}
-
-function doIt() {
-    echo "|* debug is" ${debug}
-    echo "|* TARGET is" ${TARGET}
-    echo "|* backup folder is" ${BACKUP_DIR}
-    echo "|* DOTFILES is" ${DOTFILES}
-    echo "|* SOURCE is" ${SOURCE}
-
-    if [ ! -e ${BACKUP_DIR} ]; then
-        mkdir -p ${BACKUP_DIR};
-    fi
-
-    assets=$(cat ${DOTFILES}/list | xargs);
-    echo "|* tracking assets: [ {$assets} ] "
-    echo ""
-
+#
+# Recursively copies the items in a directory.
+#
+function copyDirectory() {
+    local asset=$1
+    local dotsDirAsset=$2
+    local targetAsset=$3
+    echoStatus ". [dir]" "${targetAsset}"
+    local assets=$(find ${asset} -mindepth 1 -maxdepth 1 -print | xargs)
     install_assets ${assets}
 }
 
-if [ "$1" == "--force" -o "$1" == "-f" ]; then
-	doIt;
+#
+# Copies an item over an existing item. If the existing item is identical to the new
+# one then nothing is copied, otherwise the existing item is backed up before the copy.
+#
+function copyExisting() {
+    local asset=$1
+    local dotsDirAsset=$2
+    local targetAsset=$3
+    targetHash=$(md5prog ${targetAsset})
+    dotsDirHash=$(md5prog ${dotsDirAsset})
+    if [ ${dotsDirHash} = ${targetHash} ]; then
+        echoStatus "S [same]" "${targetAsset}"
+    else
+        copyBackup ${asset} ${dotsDirAsset} ${targetAsset}
+    fi
+}
+
+#
+# Installs a single asset to the correct location. If the asset is a directory then
+# it is recursively processed.
+#
+function install_asset() {
+    local asset=$1
+    local dotsDirAsset="${dotsDir}/${asset}"
+    local targetAsset="${target}/${asset}"
+    if [ -d ${dotsDirAsset} ]; then
+        copyDirectory ${asset} ${dotsDirAsset} ${targetAsset}
+    elif [ ! -e ${targetAsset} ]; then
+        copyNew ${asset} ${dotsDirAsset} ${targetAsset}
+    else
+        copyExisting ${asset} ${dotsDirAsset} ${targetAsset}
+    fi
+}
+
+#
+# Processes the list of assets and installs them to the correct location.
+#
+function install_assets() {
+    local assets=$*
+    echoDebug "assets: [ ${assets} ] "
+    for asset in $@; do
+        install_asset ${asset}
+    done
+}
+
+#
+# Executes the installation based on the environment settings.
+#
+function doIt() {
+    #
+    # Make sure that we have the latest and greatest.
+    #
+    if [[ "${force}" = true || -z $(git status -s) ]]; then
+        execute git pull origin master
+    fi
+
+    if [ ! -e ${backupDir} ]; then
+        mkdir -p ${backupDir};
+    fi
+
+    install_assets "."
+}
+
+normal=$(tput sgr0)
+red=$(tput setaf 1)
+green=$(tput setaf 2)
+yellow=$(tput setaf 3)
+cyan=$(tput setaf 6)
+
+colorReset=${normal}
+colorText=${normal}
+colorStatus=${green}
+colorDebug=${cyan}
+colorError=${red}
+
+force=
+dryRun=
+debug=
+target=
+dotsDir="${projectDir}/dots"
+backupName=".dot.bak"
+
+cd ${dotsDir}
+
+# Fixing installation folder if user is root
+if [ $(whoami) = "root" ]; then
+    target="/root"
 else
-	read -p "This may overwrite existing files in your home directory. Are you sure? (y/n) " -n 1;
-	echo "";
-	if [[ $REPLY =~ ^[Yy]$ ]]; then
-		doIt;
-	fi;
-fi;
-unset doIt;
+    target=$HOME
+fi
+
+args=`getopt dfrt: $*`
+# you should not use `getopt abo: "$@"` since that would parse
+# the arguments differently from what the set command below does.
+if [ $? != 0 ]; then
+    usage
+fi
+set -- ${args}
+# You cannot use the set command with a backquoted getopt directly,
+# since the exit code from getopt would be shadowed by those of set,
+# which is zero by definition.
+for i; do
+    case "$i" in
+        -d)
+            debug=true
+            shift;;
+        -f)
+            force=true
+            shift;;
+        -r)
+            dryRun=true
+            shift;;
+        -t)
+            target=$2
+            shift
+            shift;;
+        --)
+            shift; break;;
+    esac
+done
+
+backupDir="${target}/${backupName}"
+
+echoDebug "force is" ${force}
+echoDebug "debug is" ${debug}
+echoDebug "dryRun is" ${dryRun}
+echoDebug "target is" ${target}
+echoDebug "backup folder is" ${backupDir}
+echoDebug "projectDir is" ${projectDir}
+echoDebug "dotsDir is" ${dotsDir}
+echo ""
+
+doIt
