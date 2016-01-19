@@ -1,3 +1,4 @@
+#!/usr/bin/env bash
 # Copyright (c) 2015-2016 James Keesey
 
 export GIT_PS1_SHOWDIRTYSTATE=true
@@ -9,9 +10,16 @@ export GIT_PS1_SHOWUPSTREAM=verbose
 
 sourceIf ~/.git-prompt.sh true
 
-PROMPT_PREFIX="\n"
-PROMPT_SUFFIX=" \[\e[35m\]\w \[\e[0m\]$ "
-PROMPT_PATTERN="(%s)"
+userName="\u"
+if [ "${USER}" = "JamesKeesey" ]; then
+    userName="me"
+    userStyle="${orange}"
+fi
+userPrompt="\[${userStyle}\]${userName}\[${reset}\]@\[${hostStyle}\]\h"
+
+PROMPT_PREFIX="\n\[\e]0;\u@\h  \w\a\]"
+PROMPT_SUFFIX="${userPrompt} \[${purple}\]\w \[${reset}\]\! \[${white}\]\$ \[${reset}\]"
+PROMPT_PATTERN="(%s) "
 
 #
 # Prompt will be:

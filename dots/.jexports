@@ -1,0 +1,28 @@
+#!/usr/bin/env bash
+# Copyright (c) 2015-2016 James Keesey
+
+# Increase history size to 32K
+export HISTSIZE='32768'
+export HISTFILESIZE="${HISTSIZE}"
+
+unset HISTCONTROL
+
+export LANG='en_US.UTF-8'
+export LC_ALL='en_US.UTF-8'
+
+export LESS_TERMCAP_md="${yellow}"
+export LESS_TERMCAP_me="${reset}"
+export LESS_TERMCAP_us="${bold}${green}"
+export LESS_TERMCAP_ue="${reset}"
+export LESS_TERMCAP_so="${blue}"
+export LESS_TERMCAP_se="${reset}"
+
+# Don’t clear the screen after quitting a manual page.
+export MANPAGER='less'
+export LESS='-XF'
+
+export NPM_PACKAGES="$HOME/.npm-packages"
+export NODE_PATH="$NPM_PACKAGES/lib/node_modules:$NODE_PATH"
+
+export MANPATH="$NPM_PACKAGES/share/man:$(manpath)"
+export PATH="$PATH:$NPM_PACKAGES/bin"

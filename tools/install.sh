@@ -63,7 +63,7 @@ function copyBackup() {
     local targetAsset=$3
     if [ "${force}" = true ]; then
         local backupName="${backupDir}/${asset}-$(date +"%F-%R:%S")"
-        echoStatus "C [conflict]" "${targetAsset} ${red}(forcing--backup to ${backupName})"
+        echoStatus "C [conflict]" "${targetAsset} ${red}(forcing--backup to ${backupDir})"
         local backuptargetDir="${backupDir}/$(dirname ${asset#$HOME/})"
         if [ ! -e "${backuptargetDir}" ]; then
             execute mkdir -p "${backuptargetDir}"

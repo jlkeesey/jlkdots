@@ -1,5 +1,14 @@
 # Copyright (c) 2015-2016 James Keesey
 
+#
+# Load system completions if any
+#
+if [ -f /usr/local/etc/bash_completion ]; then
+    . /usr/local/etc/bash_completion
+elif [ -f etc/bash_completion ]; then
+    . /etc/bash_completion
+fi
+
 # Add tab completion for SSH hostnames based on ~/.ssh/config, ignoring wildcards
 [ -e "$HOME/.ssh/config" ] && complete -o "default" -o "nospace" -W "$(grep "^Host" ~/.ssh/config | grep -v "[?*]" | cut -d " " -f2- | tr ' ' '\n')" scp sftp ssh;
 

@@ -39,12 +39,20 @@ Script to copy all of the dotfiles to their respective locations.
 Script to copy all of the configuration from their respective locations back to this
 directory so that GIT can be updated.
 </dd>
+<dt>brew.sh</dt>
+<dd>
+Script to install common packages on OS/X. Should run <code>brew doctor</code> first to
+make sure the environment is clean.
+</dd>
 </dl>
  
 ## Installation
 
   1. Clone the repo
-  1. Run the {repo}/tools/install.sh script.
+  1. Run the `{repo}/tools/install.sh` script.
+  1. On OS X
+    1. Run `brew doctor` and fix any issues.
+    1. Run `{repo}/tools/brew.sh` to install common tools.
   1. Log out and back in or re-source the ~/.bashrc file to get the settings.
 
 
