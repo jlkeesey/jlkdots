@@ -22,6 +22,7 @@ alias gfix="git mergetool -y"
 alias splitpath='echo "$PATH" | tr ":" "\n"'
 
 # directory navigation
+alias cd..="cd .."
 alias ..="cd .."
 alias ...="cd ../.."
 alias ....="cd ../../.."
