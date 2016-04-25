@@ -1,7 +1,10 @@
 #!/usr/bin/env bash
 # Copyright (c) 2015-2016 James Keesey
 
-function listfiles() {
-   git show --pretty='format:' --name-status $* | sort -u -k2
-}
+if [ "${includeGit}" = "true" ]; then
 
+  function listfiles() {
+    git show --pretty='format:' --name-status $* | sort -u -k2
+  }
+
+fi

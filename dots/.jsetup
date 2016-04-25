@@ -1,0 +1,19 @@
+#!/usr/bin/env bash
+# Copyright (c) 2016 James Keesey
+
+if [ "${noGit}" = "true" ]; then
+  includeGit=false
+  excludeGit=true
+else 
+  includeGit=true
+  excludeGit=false
+fi
+
+if [ "${noNPM}" = "true" ]; then
+  includeNPM=false
+  excludeNPM=true
+else 
+  includeNPM=true
+  excludeNPM=false
+fi
+

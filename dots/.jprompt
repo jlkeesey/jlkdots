@@ -1,31 +1,36 @@
 #!/usr/bin/env bash
 # Copyright (c) 2015-2016 James Keesey
 
-export GIT_PS1_SHOWDIRTYSTATE=true
-export GIT_PS1_SHOWUNTRACKEDFILES=true
-export GIT_PS1_SHOWCOLORHINTS=true
-
-export GIT_PS1_SHOWSTASHSTATE=true
-export GIT_PS1_SHOWUPSTREAM=verbose
-
-sourceIf ~/.git-prompt.sh true
-
 userName="\u"
-if [ "${USER}" = "JamesKeesey" ]; then
+if [ "${USER}" = "${LocalUser}" ]; then
     userName="me"
     userStyle="${orange}"
 fi
 userPrompt="\[${userStyle}\]${userName}\[${reset}\]@\[${hostStyle}\]\h"
 
-PROMPT_PREFIX="\n\[\e]0;\u@\h  \w\a\]"
-PROMPT_SUFFIX="${userPrompt} \[${purple}\]\w \[${reset}\]\! \[${white}\]\$ \[${reset}\]"
-PROMPT_PATTERN="(%s) "
+PROMPT_SET_TITLEBAR="\n\[\e]0;\u@\h  \w\a\]"
+PROMPT_BASE="${userPrompt} \[${purple}\]\w \[${reset}\]\! \[${white}\]\$ \[${reset}\]"
 
-#
-# Prompt will be:
-#
-#   ${PROMPT_PREFIX}${PROMPT_PATTERN}${PROMPT_SUFFIX}
-#
-# with the %s in the PROMPT_PATTERN replaced with the generated string for GIT
-#
-export PROMPT_COMMAND='__git_ps1 "${PROMPT_PREFIX}" "${PROMPT_SUFFIX}" "${PROMPT_PATTERN}"'
+if [ "${includeGit}" = "true" ]; then
+  export GIT_PS1_SHOWDIRTYSTATE=true
+  export GIT_PS1_SHOWUNTRACKEDFILES=true
+  export GIT_PS1_SHOWCOLORHINTS=true
+
+  export GIT_PS1_SHOWSTASHSTATE=true
+  export GIT_PS1_SHOWUPSTREAM=verbose
+
+  sourceIf ~/.git-prompt.sh true
+
+  PROMPT_PATTERN="(%s) "
+
+  #
+  # Prompt will be:
+  #
+  #   ${PROMPT_PREFIX}${PROMPT_PATTERN}${PROMPT_SUFFIX}
+  #
+  # with the %s in the PROMPT_PATTERN replaced with the generated string for GIT
+  #
+  export PROMPT_COMMAND='__git_ps1 "${PROMPT_SET_TITLEBAR}" "${PROMPT_BASE}" "${PROMPT_PATTERN}"'
+else
+  PS1="${PROMPT_SET_TITLEBAR}${PROMPT_BASE}"
+fi
