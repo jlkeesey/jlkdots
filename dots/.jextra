@@ -3,6 +3,9 @@
 
 export DEV=~/Development
 
-export JAVA_VERSION=1.8.0_60
-export JAVA_HOME=`/usr/libexec/java_home -v $JAVA_VERSION`
+# export JAVA_VERSION=1.8.0_60
+# export JAVA_HOME=`/usr/libexec/java_home -v $JAVA_VERSION`
+
+# make less more friendly for non-text input files, see lesspipe(1)
+[ -x /usr/bin/lesspipe ] && eval "$(SHELL=/bin/sh lesspipe)"
 

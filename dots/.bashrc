@@ -30,7 +30,7 @@ function sourceIf() {
 # Load the shell dotfiles, and then some:
 # * ~/.path can be used to extend `$PATH` and  MANPATH.
 # * ~/.extra can be used for other settings you don’t want to commit.
-for file in ~/.{jcolor,jprompt,jexports,jpath,jaliases,jfunctions,jextra,jcompletions}; do
+for file in ~/.{jlocal-setup,jsetup,jcolor,jprompt,jexports,jpath,jaliases,jfunctions,jextra,jcompletions,jlocal}; do
     sourceIf ${file}
 done;
 unset file;
